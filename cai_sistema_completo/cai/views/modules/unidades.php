@@ -81,20 +81,8 @@ $mvc = new MvcController();
 			
 		</div>
 	</form>
-
-
-	<div id="modal2" class="modal modal-fixed-footer">
-		<div class="modal-content">
-			<h4>Are you sure you want to delete this teacher?</h4>
-		</div>
-		<div class="modal-footer">
-			<button type="submit" class="waves-effect waves-light red darken-4 btn-small modal-close" name="add">No</button>
-			<button type="submit" class="waves-effect waves-light blue darken-4 btn-small" name="add">Yes</button>
-		</div>
-	</div>
 		
 </div>
 <?php
-	$mvc-> updateStudentController();
-	$mvc-> addStudentController();
+	$mvc-> updateUnitController();
 ?>

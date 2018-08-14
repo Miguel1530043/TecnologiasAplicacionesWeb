@@ -568,21 +568,25 @@
     ##########################################################################################################################
     ################################################ HOURS CONTROLLER #######################################################
     ##########################################################################################################################
-    
+    	//Metodo para agregar una hora de cai
 	    public static function addHourController(){
 
-	      	if(isset($_POST["Iniciar"])){
+	      	if(isset($_POST["Iniciar"])){//Si se hace uso del metodo post con el boton de nombre iniciar se hara lo siguiente
 	      		
-	      		$numero = 0;
-	      		$nombre = Data::editStudentModel($_POST["matricula"],"alumnos","grupos");
-	      		if($nombre){
+	      		$numero = 0;//Variable que determinara si un alumno se encuntra dentro de cai o no
+	      		$nombre = Data::editStudentModel($_POST["matricula"],"alumnos","grupos");//Se consultan los datos del alumno dependiendo de la matricula
+	      		if($nombre){//Se condiciona si si existe dicho alumno
+
+	      			//Se declara un arreglo con todos los datos que se neceistan para registrar la hora
 	      			$arreglo = array("matricula"=>$_POST["matricula"],"actividad" =>$_POST["actividad"],"nombre"=>$nombre["nombre_alumno"]." ".$nombre["apellidos_alumno"],"hora_entrada"=>date("H:i"),"fecha"=>date("Y-m-d"),"tiempo"=>time());
+		      		//Por cada sesison que se encuentre dentro del arreglo de sesion en hora, se hara una comparacion para ver si el alumno ya esta dentro de cai o no
 		      		foreach ($_SESSION["horas"] as $row => $matriculas) {
 		      			if($matriculas["matricula"]==$arreglo["matricula"]){
 		      				$numero=1;
 		      				break;	
 		      			}
 		      		}
+		      		//Se condiciona si el tiempo en minutos es menor a 5, entonces el alumno puede ingresar a cai
 		      		if(date("i")<05){
 		      			if($numero==1){
 	      					echo"This student is already in CAI";
@@ -590,16 +594,18 @@
 	      					$_SESSION["horas"][] = $arreglo;
 	      				}
 	      			}else{
+	      				//Sino se determinara que se excedio el tiempo de registro de sesion en cai
 	      				echo "Exceed Limit time to add a student to cai";
 	      			}
 	      			
 		      	}else{
-		      		echo"This student isn't registred in the system";
+		      		echo"This student isn't registred in the system";//Si la consullta no fue exitosa se determinara que el alumno no estta registrado
 		      	}
 
 	      		
 	     	}
 	    }
+	    //Metodo que muestra todas las sesiones de cai que estan activas
 	    public static function showHourController(){
 	    	if(isset($_SESSION["horas"])){
 	    		foreach ($_SESSION["horas"] as $row => $matriculas) {
@@ -632,33 +638,34 @@
 	        }
 	    }
 
+	    //Metodo que termina con la sesion de cai de un alumno
 	    public static function finishHourController(){
 	    	$tiempo = 3000;
 	    	$tiempoMaximo = 3600;
-	    	$var = 0;
+	    	$var = 0;//Variable que determinara si se puede terminar la sesion o no
 	    	if(isset($_POST["finish"])){
 	    		foreach ($_SESSION["horas"] as $row => $alumno) {
 	    			if($alumno["matricula"]==$_POST["matricula"]){
 	    				
 	    				$T = time()-$alumno["tiempo"];
 	    				echo $T;
-	    				if($T<$tiempo){
+	    				if($T<$tiempo){//Si el tiempo en segundos es menor a 3000  var=1
 	    					$var=1;
-	    				}else if($T>$tiempoMaximo){
+	    				}else if($T>$tiempoMaximo){// Si el tiempo pasa de los 3600 var = 2 y la sesion terminara
 	    					$var=2;
 	    					session_unset($_SESSION["horas"]);
-	    				}else if($T>=$tiempo && $T<=$tiempoMaximo){
+	    				}else if($T>=$tiempo && $T<=$tiempoMaximo){// Si el tiempo es meyor o igual a 3000 y el tiempo en menor o igual a 3600, var=3 y terminara la sesion
 	    					$var=3;
 	    					session_unset($_SESSION["horas"]);
 	    				}
 	    			}
 	    		}
 
-	    		if($var==1){
+	    		if($var==1){//Si var es igual a 1, entonces la sesion no puede terminar
 	    			echo "The session can not be finish before a 50 minutes lapse";
-	    		}else if($var == 2){
+	    		}else if($var == 2){//Si var es igual a 2, la sesion teminara por que se paso el tiempo de terminar la sesion
 	    			echo "The student exceed the limit to finish the session";
-	    		}else if($var==3){
+	    		}else if($var==3){// Si var es igual a 3, entonces se termino la sesion exitosamente y se realizara la insercion a la base de datos de dicha sesion de cai
 	    			$unidad = MvcController::determineUnit();
 	    			echo "Session Concluded";
 	    			$arregloHora = array("hora_entrada"=>$_POST["hora_entrada"],"hora_salida"=>date("H:i:s"),"fecha"=>$_POST["fecha"],"matricula"=>$_POST["matricula"],"actividad"=>$_POST["actividad"],"unidad"=>$unidad);
@@ -666,6 +673,7 @@
 	    		}
 	    	}
 	    }
+	    //Metodo para cancelar la hora de cai
 	    public static function cancelHourController(){
 	    	if(isset($_POST["cancelar"])){
 	    		foreach ($_SESSION["horas"] as $row => $alumno) {
@@ -675,22 +683,22 @@
 	    		}
 	    	}
 	    }
+	    //Metodo para terminar todas las sesiones de cai
 	    public static function finishAllHoursController(){
 		    if(isset($_POST["finishAll"])){
-		    	if(date("i")>=55||date("i")>=50 && date("i")<=59){
+		    	if(date("i")>=55||date("i")>=50 && date("i")<=59){//se determinara si la hora es apropiada para terminar la hora de cai, si lo es se ralizara lo siguiente
 		    		$unidad = MvcController::determineUnit();
-		    		foreach ($_SESSION["horas"] as $row => $sesion) {
-
+		    		foreach ($_SESSION["horas"] as $row => $sesion) {//Por cada sesion de cai se realizara la asignacion de los valores de la sesion a un arreglo, el cual sera registrado como parametro para terminar cada una de las horas de cai.
 	    				$arregloHora = array("hora_entrada"=>$_SESSION["horas"]["hora_entrada"],"hora_salida"=>date("H:i:s"),"fecha"=>date("Y-M-D"),"matricula"=>$_SESSION["horas"]["matricula"],"actividad"=>$_SESSION["horas"]["actividad"],"unidad"=>$unidad);
 	    				$answer = Data::finishHourModel($arregloHora,"horas","horas_alumno");
 		    		}		    		
-		    		session_unset($_SESSION["horas"]);
-		    	}else{
+		    		session_unset($_SESSION["horas"]);//Se terminaran las horas de cai
+		    	}else{//Si la hora no es adecuada para terminar, se determinara que no se puede acabar la sesion
 		    		echo"You can't end up all cai hours yet";
 		    	}
 		    }
 	    }
-
+	    //Metodo para determinar la unidad de la sesion de cai que se esta realizando, dependiendo de las fechas en la cual se esta realizando se determinara para que unidad se esta realizando a hora de cai.
 	    public static function determineUnit(){
 	    	$answer = Data::showUnitsModel("unidad");
 	    	foreach ($answer as $row => $unit) {
@@ -723,8 +731,7 @@
 	    	}
 	    }
 
-	    
-
+	    //Metodo para mostrar los teachers que tienen alumnos que realizaron sesion de cai.
 	    public static function sessionsController(){
 	    	$answer = Data::showTeachersModel("teachers");
 			foreach ($answer as $row => $session) {
@@ -742,6 +749,7 @@
 				</table>";
 	    }
 
+	    //Metodo que Visualiza la sesion de los alumnos de cada grupo que tiene cada teacher
 	    public static function teacherSessionsController(){
 	    	$data = $_GET["num_empleado"];
 	    	$answer =  Data::showTeachersGroupsModel($data,"grupos");
@@ -758,7 +766,7 @@
 			</table>";
 
 	    }
-
+	    //Metodo que muestra a los alumnos de cada grupo que hayan realizado alguna sesion de cai
 	    public static function teacherStudentsSessionController(){
 	    	$data=$_GET["id_grupo"];
 	    	$answer = Data::teacherStudentSessionsModel($data,"alumnos","horas_alumno");
@@ -777,6 +785,7 @@
 			echo"</tbody>
 			</table>";
 	    }
+	    //Metodo que muestra los detalles de la sesion que realizo un alumno
 	    public static function studentHoursDetailController(){
 	    	$data = $_GET["matricula"];
 	    	$answer = Data::studentHoursDetailModel($data,"horas_alumno","horas");
@@ -796,7 +805,7 @@
 	    }
 
 
-
+	    //Metodo que permite visualizar las unidades
 	    public static function showUnitsController(){
 	    	$answer = Data::showUnitsModel("unidad");
 	    	foreach ($answer as $row => $unit) {
@@ -815,6 +824,7 @@
 			}
 	    }
 
+	    //Metodo que permite la edicion de las unidades
 	    public static function editUnitController($data){
 			$answer = Data::editUnitModel($data,"unidad");
 			echo'
@@ -824,7 +834,7 @@
 					<h4>Info</h4>
 						<div class="row">
 		                	<div class="input-field col s12">
-		                    	<input type="hidden" name="matricula" value="'.$answer['id_unidad'].'">
+		                    	<input type="hidden" name="id_unidad" value="'.$answer['id_unidad'].'">
 		                	</div>
 							<div class="input-field col s12">
 								<input type="date" name="fecha_inicio" value="'.$answer['fecha_inicio'].'">
@@ -844,6 +854,23 @@
 			</form>
 			';
 	    }
+	    //Este metodo utilizara los datos que se encuentren dentro del metodo editUnitController, ya que son lo que se utilizaran para hacer la modificacion del grupo
+		public static function updateUnitController(){
+
+			if(isset($_POST["update"])){
+
+				$data = array("id_unidad"=>$_POST["id_unidad"],"fecha_inicio"=>$_POST["fecha_inicio"],"fecha_termino"=>$_POST["fecha_termino"]);
+				$answer = Data::updateUnitModel($data, "unidad");
+				if($answer == "success"){
+					echo "<script>
+						window.location='index.php?action=unidades';
+					</script>";
+				}
+				else{
+					echo "Error al Actualizar";
+				}
+			}
+		}
 
 	}
 ?>

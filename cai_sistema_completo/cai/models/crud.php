@@ -1,5 +1,4 @@
 <?php
-
 	require_once "connection.php";
 	class Data extends Connection{
 		
@@ -11,10 +10,10 @@
 			return $statement->fetchAll();
 			$statement->close();
 		}
-    
-    public static function showStudentsGroupModel($data,$table){
+    	//Metodo para mostrar todos los estudiantes dependiendo del grupo
+    	public static function showStudentsGroupModel($data,$table){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table  WHERE grupo = :grupo");
-      $statement->bindParam(":grupo",$data,PDO::PARAM_INT);
+      		$statement->bindParam(":grupo",$data,PDO::PARAM_INT);
 			$statement->execute();
 			return $statement->fetchAll();
 			$statement->close();
@@ -73,6 +72,7 @@
 			}
 		}
 
+		//Metodoo que muestra todos los grupos, para ser vistos por medio de un select
 		public static function selectGroupModel($table){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table");
 			$statement->execute();
@@ -88,7 +88,9 @@
 			return $statement->fetchAll();
 			$statement->close();
 		}
-    public static function showTeachersGroupsModel($data,$table){
+
+		//Metodo que realiza la consulta que contendra todos los grupos de un teacher seleccionado
+    	public static function showTeachersGroupsModel($data,$table){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table WHERE teacher =:teacher");
       		$statement->bindParam("teacher",$data,PDO::PARAM_INT);
 			$statement->execute();
@@ -97,7 +99,6 @@
 		}
 
 		//Metodo para realizar la inserion de un grupo en la base de datos,.
-
 		public static function addGroupModel($data,$table){
 			$statement = Connection::connect()->prepare("INSERT INTO $table(nombre_grupo,nivel,teacher) VALUES (:nombre_grupo,:nivel,:teacher)");
 			$statement ->bindParam(":nombre_grupo",$data["nombre_grupo"],PDO::PARAM_STR);
@@ -110,6 +111,7 @@
 				return "fail";
 			}
 		}
+
 		//Metodo para realizar la consulta que devolvera los datos del grupo la cual se desea editar
 		public static function editGroupModel($data,$table,$table2){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table as g inner join $table2 as t WHERE t.num_empleado = g.teacher AND g.id_grupo = :id_grupo");
@@ -157,6 +159,7 @@
 		########################################################## TEACHERS ###############################################################3
 		#####################################################################################################################################
 
+		//Metodo que contendra toda la informacion de todos los teachers
 		public static function showTeachersModel($table){
 			$statement = Connection::connect()->prepare("SELECT * from $table");
 			$statement->execute();
@@ -164,6 +167,7 @@
 			$statement->close();
 		}
 		
+		//Metodo que realizara el agregado hacia la base de datos de un teacher, recibiendo todos los datos requeridos para realizar las insercion en la base de datos, mediante el uso de bindParam, para hacer que los datos sean mas seguros.
 		public static function addTeacherModel($data,$table){
 			$statement = Connection::connect()->prepare("INSERT INTO $table(num_empleado,nombre_teacher,apellidos_teacher,email,password,foto,telefono) VALUES (:num_empleado,:nombre_teacher,:apellidos_teacher,:email,:password,:foto,:telefono)");
 			$statement ->bindParam(":num_empleado",$data["num_empleado"],PDO::PARAM_INT);
@@ -180,6 +184,7 @@
 			}	
 		}
 
+		//Metodo para realizar el borrado de la informacion de un teacher en la base de datos, dependiendo de su identificador el cual es su numero de empleado
 		public static function deleteTeacherModel($data,$table){
 			$statement = Connection::connect()->prepare("DELETE FROM $table WHERE num_empleado = :num_empleado");
 			$statement->bindParam(":num_empleado",$data,PDO::PARAM_INT);
@@ -190,6 +195,7 @@
 			}
 		}
 
+		//Metodo que realizara la edicion de la informacion de un teacher dependiendo de su numero de empleado, el cual es su identificador en la base de datos
 		public static function editTeacherModel($data,$table){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table WHERE num_empleado = :num_empleado");
 			$statement->bindParam(":num_empleado",$data,PDO::PARAM_INT);
@@ -198,17 +204,9 @@
 			$statement->close();
 		}
 
+		//Metodo que realizara la acutalizacion de un teacher tomando los valores correspondientes a cada parte de los campos en la base de datos.
 		public static function updateTeacherModel($data,$table){
-			
-			$statement = Connection::connect()->prepare("UPDATE $table SET 
-					nombre_teacher = :nombre_teacher,
-					apellidos_teacher = :apellidos_teacher,
-					email = :email,
-					password = :password,
-					foto = :foto,
-					telefono = :telefono
-					WHERE num_empleado = :num_empleado");
-
+			$statement = Connection::connect()->prepare("UPDATE $table SET nombre_teacher = :nombre_teacher, apellidos_teacher = :apellidos_teacher, email = :email, password = :password, foto = :foto, telefono = :telefono WHERE num_empleado = :num_empleado");
 			$statement->bindParam(":nombre_teacher",$data["nombre_teacher"],PDO::PARAM_STR);
 			$statement->bindParam(":apellidos_teacher",$data["apellidos_teacher"],PDO::PARAM_STR);
 			$statement->bindParam(":email",$data["email"],PDO::PARAM_STR);
@@ -216,8 +214,6 @@
 			$statement->bindParam(":foto",$data["foto"],PDO::PARAM_STR);
 			$statement->bindParam(":telefono",$data["telefono"],PDO::PARAM_STR);
 			$statement->bindParam(":num_empleado",$data["num_empleado"],PDO::PARAM_INT);
-			
-			
 			if($statement->execute()){
 				return "success";
 			}else{
@@ -225,6 +221,7 @@
 			}
 		}
 
+		//Metodo que se realizara al termino de una hora de cai, recibiendo la hora de entrada, hora de salida, la fecha, actividade realizada, matricula del alumno y la unidad a la cual se esta realizando la sesion de cai.
 		public static function finishHourModel($data,$table,$table2){
 			$statement = Connection::connect()->prepare("INSERT INTO $table(hora_entrada,hora_salida,fecha) VALUES (:hora_entrada,:hora_salida,:fecha)");
 			$statement->bindParam(":hora_entrada",$data["hora_entrada"],PDO::PARAM_STR);
@@ -241,14 +238,14 @@
 			$statement2->execute();
 		}
 
-
+		//Metodo que muestra las unidades que existen
 		public static function showUnitsModel($table){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table");
 			$statement->execute();
 			return $statement->fetchAll();
 			$statement->close();
 		}	
-
+		//Metodo que permite editar la unidad de cai
 		public static function editUnitModel($data,$table){
 			$statement = Connection::connect()->prepare("SELECT * FROM $table WHERE id_unidad = :id_unidad");
 			$statement->bindParam(":id_unidad",$data,PDO::PARAM_INT);
@@ -256,7 +253,20 @@
 			return $statement->fetch();
 			$statement->close();
 		}
+		//Metodo que realizara la acutalizacion de un teacher tomando los valores correspondientes a cada parte de los campos en la base de datos.
+		public static function updateUnitModel($data,$table){
+			$statement = Connection::connect()->prepare("UPDATE $table SET fecha_inicio = :fecha_inicio, fecha_termino = :fecha_termino WHERE id_unidad = :id_unidad");
+			$statement->bindParam(":fecha_inicio",$data["fecha_inicio"],PDO::PARAM_STR);
+			$statement->bindParam(":fecha_termino",$data["fecha_termino"],PDO::PARAM_STR);
+			$statement->bindParam(":id_unidad",$data["id_unidad"],PDO::PARAM_INT);
+			if($statement->execute()){
+				return "success";
+			}else{
+				return "fail";
+			}
+		}
     	
+    	//Metodo que contiene el resultadod de consultar las sesiones de los alumnos de cada teacher, dependiendo de su matricula y el id del grupo
     	public static function teacherStudentSessionsModel($data,$table,$table2){
     		$statement = Connection::connect()->prepare("SELECT *,COUNT(ha.matricula_alumno) as 'total_horas' FROM $table AS a INNER JOIN $table2 AS ha ON a.matricula = ha.matricula_alumno WHERE grupo = :grupo");
     		$statement->bindParam(":grupo",$data,PDO::PARAM_INT);
@@ -264,7 +274,7 @@
     		return $statement->fetchAll();
     		$statement->close();
     	}
-
+    	//Metodo que contendra la informacion de los detalles de cada sesion de cai de cada alumno
     	public static function studentHoursDetailModel($data,$table,$table2){
     		$statement = Connection::connect()->prepare("SELECT * FROM $table as ha INNER JOIN $table2 as h ON ha.id_hora = h.id_hora WHERE matricula_alumno = :matricula_alumno");
     		$statement->bindParam(":matricula_alumno",$data,PDO::PARAM_INT);
